@@ -79,6 +79,12 @@ export const handler = async (event) => {
         if (!matchId) {
             return { statusCode: 400, body: JSON.stringify({ error: 'Missing matchId' }) };
         }
+        if (!frameStart) {
+            return { statusCode: 400, body: JSON.stringify({ error: 'Missing frameStart' }) };
+        }
+        if (!frameEnd) {
+            return { statusCode: 400, body: JSON.stringify({ error: 'Missing frameEnd' }) };
+        }
 
         // match settings
         const matchSettingsQuery = `
