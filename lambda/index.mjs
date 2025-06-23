@@ -100,7 +100,7 @@ export const handler = async (event) => {
         const { matchSettingsResults } = await runAthenaQuery(matchSettingsQuery);
 
         const matchSettings = {
-            ...await runAthenaQuery(matchSettingsQuery),
+            ...matchSettingsResults,
             ...matchSettingsDefaults
         };
 
