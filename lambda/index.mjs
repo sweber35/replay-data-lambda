@@ -97,7 +97,7 @@ export const handler = async (event) => {
             WHERE match_id = '${ matchId }'
         `;
 
-        const { matchSettingsResults } = await runAthenaQuery(matchSettingsQuery);
+        const [ matchSettingsResults ] = await runAthenaQuery(matchSettingsQuery);
 
         const matchSettings = {
             ...matchSettingsResults,
@@ -131,7 +131,7 @@ export const handler = async (event) => {
             SELECT *
             FROM frames
             WHERE match_id = '${ matchId }'
-            AND frame_number BETWEEN ${frameStart} AND ${frameEnd}
+                AND frame_number BETWEEN ${frameStart} AND ${frameEnd}
         `;
         const framesResult = await runAthenaQuery(framesQuery);
 
@@ -153,7 +153,7 @@ export const handler = async (event) => {
                 owner
             FROM items
             WHERE match_id = '${matchId}'
-            AND frame BETWEEN ${frameStart} AND ${frameEnd}
+                AND frame BETWEEN ${frameStart} AND ${frameEnd}
         `;
         const itemFrames = await runAthenaQuery(itemsQuery);
 
@@ -161,7 +161,7 @@ export const handler = async (event) => {
             SELECT *
             FROM platforms
             WHERE match_id = '${ matchId }'
-            AND frame BETWEEN ${frameStart} AND ${frameEnd}
+                AND frame BETWEEN ${frameStart} AND ${frameEnd}
         `;
         const platformFrames = await runAthenaQuery(platformsQuery);
 
