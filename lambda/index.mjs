@@ -161,7 +161,7 @@ export const handler = async (event) => {
             SELECT *
             FROM platforms
             WHERE match_id = '${ matchId }'
-                AND frame BETWEEN ${frameStart} AND ${frameEnd}
+                // AND frame BETWEEN ${frameStart} AND ${frameEnd}
         `;
         const platformFrames = await runAthenaQuery(platformsQuery);
 
