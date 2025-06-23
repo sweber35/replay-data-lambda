@@ -292,8 +292,7 @@ export const handler = async (event) => {
             ending: gameEnding
         }
 
-        console.log(JSON.stringify(replayData, null, 2));
-        return JSON.stringify(replayData, null, 2);
+        return JSON.stringify(replayData);
 
     } catch (err) {
         console.error('Athena query error:', err);
