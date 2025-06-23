@@ -157,7 +157,7 @@ export const handler = async (event) => {
         const platformsQuery = `
             SELECT *
             FROM platforms
-            WHERE match_id = ${ matchId }
+            WHERE match_id = '${ matchId }'
             AND frame BETWEEN ${frameStart} AND ${frameEnd}
         `;
         const platformFrames = await runAthenaQuery(platformsQuery);
@@ -167,7 +167,7 @@ export const handler = async (event) => {
         for (const frame of framesResult) {
             let players = [];
             let items = [];
-            players[frame.player_index] = {
+            players.push({
                 frameNumber: frame.frame_number,
                 playerIndex: frame.player_index,
                 inputs: {
@@ -244,7 +244,7 @@ export const handler = async (event) => {
 
                     ...playerStateDefaults
                 }
-            };
+            });
 
             let relevantItemFrames = itemFrames.filter( itemFrame => itemFrame.frameNumber === frame.frame_number);
 
@@ -290,7 +290,7 @@ export const handler = async (event) => {
         }
 
         console.log(JSON.stringify(replayData, null, 2));
-        return JSON.stringify(replayData);
+        return JSON.stringify(replayData, null, 2);
 
     } catch (err) {
         console.error('Athena query error:', err);
