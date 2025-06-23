@@ -159,10 +159,13 @@ export const handler = async (event) => {
 
         const platformsQuery = `
             SELECT *
-            FROM platforms
-            WHERE match_id = '${ matchId }'
+            FROM (
+                (SELECT * FROM platforms WHERE match_id = '${matchId}' AND frame BETWEEN ${frameStart} AND ${frameEnd})
+                UNION ALL
+                (SELECT * FROM platforms WHERE match_id = '${matchId}' AND frame < ${frameStart} ORDER BY frame DESC LIMIT 1)
+            ) t
+            ORDER BY frame;
         `;
-        // AND frame BETWEEN ${frameStart} AND ${frameEnd}
         const platformFrames = await runAthenaQuery(platformsQuery);
 
         console.log(JSON.stringify(platformFrames, null, 2));
