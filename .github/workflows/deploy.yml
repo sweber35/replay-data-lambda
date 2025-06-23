@@ -13,9 +13,9 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-#      - name: Install Lambda dependencies
-#        working-directory: lambda
-#        run: npm ci
+      - name: Install Lambda dependencies
+        working-directory: lambda
+        run: npm ci
 
       - name: Zip Lambda source
         working-directory: lambda
