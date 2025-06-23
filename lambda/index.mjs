@@ -96,6 +96,9 @@ export const handler = async (event) => {
             FROM match_settings
             WHERE match_id = '${ matchId }'
         `;
+
+        const { matchSettingsResults } = await runAthenaQuery(matchSettingsQuery);
+
         const matchSettings = {
             ...await runAthenaQuery(matchSettingsQuery),
             ...matchSettingsDefaults
