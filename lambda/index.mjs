@@ -10,7 +10,7 @@ import {
     matchSettingsDefaults,
     playerSettingsDefaults,
     playerStateDefaults
-} from "./defaults.js";
+} from "./defaults";
 
 const athena = new AthenaClient({ region: 'us-east-2' });
 
