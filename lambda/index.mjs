@@ -165,6 +165,8 @@ export const handler = async (event) => {
         `;
         const platformFrames = await runAthenaQuery(platformsQuery);
 
+        console.log(JSON.stringify(platformFrames, null, 2));
+
         let frames = [];
 
         for (const frame of framesResult) {
@@ -292,6 +294,7 @@ export const handler = async (event) => {
             ending: gameEnding
         }
 
+        console.log(JSON.stringify(replayData, null, 2));
         return JSON.stringify(replayData);
 
     } catch (err) {
