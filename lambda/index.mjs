@@ -59,22 +59,20 @@ async function runAthenaQuery(query) {
 /**
  * @param {Array<{ frame: number, height: number }>} changes - Sorted list of platform height changes.
  * @param {number} currentFrame - The frame to evaluate platform height at.
+ * @param {number} defaultHeight - Starting height of platform if no change events have occurred yet.
  * @returns {number|null} - The current platform height or null if no change has occurred yet.
  */
-function getPlatformHeightAtFrame(changes, currentFrame) {
+function getPlatformHeightAtFrame(changes, currentFrame, defaultHeight) {
     let height = null;
 
     for (const change of changes) {
-        console.log('change:', change);
         if (Number(change.frame) > Number(currentFrame)) {
-            console.log('DEBUG 1', change.frame, currentFrame);
             break;
         }
         height = Number(change.platform_height);
-        console.log('DEBUG 2', change.platformHeight);
     }
-    console.log('DEBUG 3', height);
-    return height;
+
+    return height !== null ? height : defaultHeight;
 }
 
 export const handler = async (event) => {
@@ -355,11 +353,13 @@ export const handler = async (event) => {
                 frameNumber: Number(frameNumber),
                 fodLeftPlatformHeight: Number(getPlatformHeightAtFrame(
                     platformFrames.filter(frame => frame.platform == 1).sort((a, b) => a.frame - b.frame),
-                    frameNumber
+                    frameNumber,
+                    20.0
                 )),
                 fodRightPlatformHeight: Number(getPlatformHeightAtFrame(
                     platformFrames.filter(frame => frame.platform == 0).sort((a, b) => a.frame - b.frame),
-                    frameNumber
+                    frameNumber,
+                    27.44186047
                 ))
             };
 
