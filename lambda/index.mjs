@@ -114,6 +114,9 @@ export const handler = async (event) => {
 
         const matchSettings = {
             ...matchSettingsResults,
+            frameCount: Number(matchSettingsResults.frameCount),
+            stage: Number(matchSettingsResults.stage),
+            timer: Number(matchSettingsResults.timer),
             ...matchSettingsDefaults
         };
 
@@ -135,6 +138,10 @@ export const handler = async (event) => {
         const playerSettings = playerSettingsResult.map( player => {
             return {
                 ...player,
+                playerIndex: Number(player.playerIndex),
+                port: Number(player.port),
+                externalCharacterId: Number(player.externalCharacterId),
+                playerType: Number(player.playerType),
                 ...playerSettingsDefaults
             }
         });
@@ -365,7 +372,6 @@ export const handler = async (event) => {
             ending: gameEnding
         }
 
-        console.log(JSON.stringify(replayData, null, 2));
         return {
             statusCode: 200,
             body: JSON.stringify(replayData),
