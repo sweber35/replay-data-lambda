@@ -218,6 +218,7 @@ export const handler = async (event) => {
             ORDER BY frame;
         `;
         const platformFrames = await runAthenaQuery(platformsQuery);
+        console.log('platformFrames:', platformFrames);
 
         const groupedFrames = new Map();
 
