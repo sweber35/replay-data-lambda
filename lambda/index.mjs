@@ -20,6 +20,12 @@ async function runAthenaQuery(query) {
         QueryString: query,
         QueryExecutionContext: { Database: process.env.GLUE_DATABASE },
         ResultConfiguration: { OutputLocation: process.env.QUERY_OUTPUT_LOCATION },
+        ResultReuseConfiguration: {
+            ResultReuseByAgeConfiguration: {
+                Enabled: true,
+                MaxAgeInMinutes: 60, // Adjust as needed (max is 43200 = 30 days)
+            }
+        }
     });
 
     const start = await athena.send(startCommand);
