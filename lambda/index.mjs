@@ -160,40 +160,40 @@ export const handler = async (event) => {
         const platformsQuery = `
             SELECT *
             FROM (
-                -- Platform changes within the range
-                SELECT *
-                    FROM platforms
-                    WHERE match_id = '${matchId}'
-                        AND frame BETWEEN ${frameStart} AND ${frameEnd}
-                
-                UNION ALL
-                
-                -- Most recent right platform change before the range
-                SELECT *
-                    FROM (
-                        SELECT *
-                        FROM platforms
-                        WHERE match_id = '${matchId}'
+                 -- Platform changes within the range
+                 SELECT *
+                 FROM platforms
+                 WHERE match_id = '${matchId}'
+                   AND frame BETWEEN ${frameStart} AND ${frameEnd}
+    
+                 UNION ALL
+    
+                 -- Most recent right platform change before the range
+                 SELECT *
+                 FROM (
+                          SELECT *
+                          FROM platforms
+                          WHERE match_id = '${matchId}'
                             AND platform = 0
                             AND frame < ${frameStart}
-                        ORDER BY frame DESC
-                        LIMIT 1
-                    )
-                
-                UNION ALL
-                
-                -- Most recent left platform change before the range
-                SELECT *
-                    FROM (
-                        SELECT *
-                            FROM platforms
-                            WHERE match_id = '${matchId}'
-                                AND platform = 1
-                                AND frame < ${frameStart}
-                            ORDER BY frame DESC
-                        LIMIT 1
-                    )
-            ) t
+                          ORDER BY frame DESC
+                              LIMIT 1
+                      )
+    
+                 UNION ALL
+    
+                 -- Most recent left platform change before the range
+                 SELECT *
+                 FROM (
+                          SELECT *
+                          FROM platforms
+                          WHERE match_id = '${matchId}'
+                            AND platform = 1
+                            AND frame < ${frameStart}
+                          ORDER BY frame DESC
+                              LIMIT 1
+                          )
+                 ) t
             ORDER BY frame;
         `;
         const platformFrames = await runAthenaQuery(platformsQuery);
@@ -296,11 +296,11 @@ export const handler = async (event) => {
             let stageState = {
                 frameNumber: frame.frame_number,
                 fodLeftPlatformHeight: getPlatformHeightAtFrame(
-                    platformFrames.filter(frame => frame.platform === 1).sort(({frame: a}, {frame: b}) => b-a),
+                    platformFrames.filter(frame => frame.platform == 1).sort(({frame: a}, {frame: b}) => b-a),
                     frame.frame_number
                 ),
                 fodRightPlatformHeight: getPlatformHeightAtFrame(
-                    platformFrames.filter(frame => frame.platform === 0).sort(({frame: a}, {frame: b}) => b-a),
+                    platformFrames.filter(frame => frame.platform == 0).sort(({frame: a}, {frame: b}) => b-a),
                     frame.frame_number
                 )
             }
