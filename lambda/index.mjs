@@ -66,11 +66,11 @@ function getPlatformHeightAtFrame(changes, currentFrame) {
 
     for (const change of changes) {
         console.log('change:', change);
-        if (Number(change.frameNumber) > Number(currentFrame)) {
-            console.log('DEBUG 1', change.frameNumber, currentFrame);
+        if (Number(change.frame) > Number(currentFrame)) {
+            console.log('DEBUG 1', change.frame, currentFrame);
             break;
         }
-        height = Number(change.platformHeight);
+        height = Number(change.platform_height);
         console.log('DEBUG 2', change.platformHeight);
     }
     console.log('DEBUG 3', height);
