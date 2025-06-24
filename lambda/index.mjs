@@ -74,8 +74,20 @@ function getPlatformHeightAtFrame(changes, currentFrame) {
 }
 
 export const handler = async (event) => {
+
+    if (event.requestContext.http.method === 'OPTIONS') {
+        return {
+            statusCode: 204,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET',
+            },
+        };
+    }
+
     try {
-        const { matchId, frameStart, frameEnd } = event;
+        const { matchId, frameStart, frameEnd } = JSON.parse(event.body);
         if (!matchId) {
             return { statusCode: 400, body: JSON.stringify({ error: 'Missing matchId' }) };
         }
@@ -92,7 +104,8 @@ export const handler = async (event) => {
                 slippi_version as replayFormatVersion,
                 match_id as startTimeStamp,
                 stage as stageId,
-                timer as timerStart
+                timer as timerStart,
+                frame_count as frameCount
             FROM match_settings
             WHERE match_id = '${ matchId }'
         `;
@@ -131,7 +144,7 @@ export const handler = async (event) => {
             SELECT *
             FROM frames
             WHERE match_id = '${ matchId }'
-                AND frame_number BETWEEN ${frameStart} AND ${frameEnd}
+              AND frame_number BETWEEN ${frameStart} AND ${frameEnd}
         `;
         const framesResult = await runAthenaQuery(framesQuery);
 
@@ -153,7 +166,7 @@ export const handler = async (event) => {
                 owner
             FROM items
             WHERE match_id = '${matchId}'
-                AND frame BETWEEN ${frameStart} AND ${frameEnd}
+              AND frame BETWEEN ${frameStart} AND ${frameEnd}
         `;
         const itemFrames = await runAthenaQuery(itemsQuery);
 
@@ -197,8 +210,6 @@ export const handler = async (event) => {
             ORDER BY frame;
         `;
         const platformFrames = await runAthenaQuery(platformsQuery);
-
-        console.log(JSON.stringify(platformFrames, null, 2));
 
         let frames = [];
 
@@ -334,6 +345,7 @@ export const handler = async (event) => {
             header: {
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET',
             }
         };
 
