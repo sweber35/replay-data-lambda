@@ -230,11 +230,11 @@ export const handler = async (event) => {
 
             for (const frame of frameGroup) {
                 players.push({
-                    frameNumber: frame.frame_number,
-                    playerIndex: frame.player_index,
+                    frameNumber: Number(frame.frame_number),
+                    playerIndex: Number(frame.player_index),
                     inputs: {
-                        frameNumber: frame.frame_number,
-                        playerIndex: frame.player_index,
+                        frameNumber: Number(frame.frame_number),
+                        playerIndex: Number(frame.player_index),
                         isNana: frame.follower === 'true',
                         physical: {
                             dPadLeft: Boolean(frame.buttons & 0x0001),
@@ -242,9 +242,9 @@ export const handler = async (event) => {
                             dPadDown: Boolean(frame.buttons & 0x0004),
                             dPadUp: Boolean(frame.buttons & 0x0008),
                             z: Boolean(frame.buttons & 0x0010),
-                            rTriggerAnalog: frame.phys_r,
+                            rTriggerAnalog: Number(frame.phys_r),
                             rTriggerDigital: Boolean(frame.buttons & 0x0020),
-                            lTriggerAnalog: frame.phys_l,
+                            lTriggerAnalog: Number(frame.phys_l),
                             lTriggerDigital: Boolean(frame.buttons & 0x0040),
                             a: Boolean(frame.buttons & 0x0100),
                             b: Boolean(frame.buttons & 0x0200),
@@ -265,41 +265,41 @@ export const handler = async (event) => {
                             x: Boolean(frame.buttons & 0x0400),
                             y: Boolean(frame.buttons & 0x0800),
                             start: Boolean(frame.buttons & 0x1000),
-                            joystickX: frame.joy_x,
-                            joystickY: frame.joy_y,
-                            cStickX: frame.c_x,
-                            cStickY: frame.c_y,
+                            joystickX: Number(frame.joy_x),
+                            joystickY: Number(frame.joy_y),
+                            cStickX: Number(frame.c_x),
+                            cStickY: Number(frame.c_y),
                             anyTrigger: Math.max(frame.phys_l, frame.phys_r)
                         }
                     },
                     state: {
-                        frameNumber: frame.frame_number,
-                        playerIndex: frame.player_index,
+                        frameNumber: Number(frame.frame_number),
+                        playerIndex: Number(frame.player_index),
                         isNana: frame.follower === 'true',
-                        internalCharacterId: frame.char_id,
-                        actionStateId: frame.action_post,
-                        xPosition: frame.pos_x_post,
-                        yPosition: frame.pos_y_post,
-                        facingDirection: frame.face_dir_post,
-                        percent: frame.percent_post,
-                        shieldSize: frame.shield,
-                        lastHittingAttackId: frame.hit_with,
-                        currentComboCount: frame.combo,
-                        lastHitBy: frame.hurt_by,
-                        stocksRemaining: frame.stocks,
-                        actionStateFrameCounter: frame.action_fc,
-                        hitstunRemaining: frame.hitstun,
+                        internalCharacterId: Number(frame.char_id),
+                        actionStateId: Number(frame.action_post),
+                        xPosition: Number(frame.pos_x_post),
+                        yPosition: Number(frame.pos_y_post),
+                        facingDirection: Number(frame.face_dir_post),
+                        percent: Number(frame.percent_post),
+                        shieldSize: Number(frame.shield),
+                        lastHittingAttackId: Number(frame.hit_with),
+                        currentComboCount: Number(frame.combo),
+                        lastHitBy: Number(frame.hurt_by),
+                        stocksRemaining: Number(frame.stocks),
+                        actionStateFrameCounter: Number(frame.action_fc),
+                        hitstunRemaining: Number(frame.hitstun),
                         isGrounded: !frame.airborne,
-                        lastGroundId: frame.ground_id,
-                        jumpsRemaining: frame.jumps,
-                        lCancelStatus: frame.l_cancel,
-                        hurtboxCollisionState: frame.hurtbox,
-                        selfInducedAirXSpeed: frame.self_air_x,
-                        selfInducedAirYSpeed: frame.self_air_y,
-                        attackBasedXSpeed: frame.attack_x,
-                        attackBasedYSpeed: frame.attack_y,
-                        selfInducedGroundXSpeed: frame.self_grd_x,
-                        hitlagRemaining: frame.hitlag,
+                        lastGroundId: Number(frame.ground_id),
+                        jumpsRemaining: Number(frame.jumps),
+                        lCancelStatus: Number(frame.l_cancel),
+                        hurtboxCollisionState: Number(frame.hurtbox),
+                        selfInducedAirXSpeed: Number(frame.self_air_x),
+                        selfInducedAirYSpeed: Number(frame.self_air_y),
+                        attackBasedXSpeed: Number(frame.attack_x),
+                        attackBasedYSpeed: Number(frame.attack_y),
+                        selfInducedGroundXSpeed: Number(frame.self_grd_x),
+                        hitlagRemaining: Number(frame.hitlag),
                         isInHitstun: frame.hitstun > 0,
                         isDead: !frame.alive,
                         ...playerStateDefaults
@@ -311,27 +311,41 @@ export const handler = async (event) => {
             let relevantItemFrames = itemFrames.filter(itemFrame => itemFrame.frameNumber === frameNumber);
             for (const itemFrame of relevantItemFrames) {
                 items.push({
-                    ...itemFrame,
-                    ...itemStateDefaults
+                    matchId: itemFrame.matchId,
+                    frameNumber: Number(itemFrame.frameNumber),
+                    typeId: Number(itemFrame.typeId),
+                    state: Number(itemFrame.state),
+                    facingDirection: Number(itemFrame.facingDirection),
+                    xVelocity: Number(itemFrame.xVelocity),
+                    yVelocity: Number(itemFrame.yVelocity),
+                    xPosition: Number(itemFrame.xPosition),
+                    yPosition: Number(itemFrame.yPosition),
+                    spawnId: Number(itemFrame.spawnId),
+                    samusMissileType: Number(itemFrame.samusMissileType),
+                    peachTurnipFace: Number(itemFrame.peachTurnipFace),
+                    isChargedShotLaunched: Number(itemFrame.isChargedShotLaunched),
+                    chargeShotLevel: Number(itemFrame.chargeShotLevel),
+                    owner: Number(itemFrame.owner),
+                    ...itemStateDefaults,
                 });
             }
 
             // Stage state
             const stageState = {
-                frameNumber: frameNumber,
-                fodLeftPlatformHeight: getPlatformHeightAtFrame(
+                frameNumber: Number(frameNumber),
+                fodLeftPlatformHeight: Number(getPlatformHeightAtFrame(
                     platformFrames.filter(frame => frame.platform == 1).sort((a, b) => b.frame - a.frame),
                     frameNumber
-                ),
-                fodRightPlatformHeight: getPlatformHeightAtFrame(
+                )),
+                fodRightPlatformHeight: Number(getPlatformHeightAtFrame(
                     platformFrames.filter(frame => frame.platform == 0).sort((a, b) => b.frame - a.frame),
                     frameNumber
-                )
+                ))
             };
 
             frames.push({
-                frameNumber,
-                randomSeed: frameGroup[0].seed, // should be the same for all players in that frame
+                frameNumber: Number(frameNumber),
+                randomSeed: Number(frameGroup[0].seed), // should be the same for all players in that frame
                 players,
                 items,
                 stage: stageState
