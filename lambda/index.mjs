@@ -65,11 +65,14 @@ function getPlatformHeightAtFrame(changes, currentFrame) {
     let height = null;
 
     for (const change of changes) {
-        if (Number(change.frame) > Number(currentFrame)) {
+        if (Number(change.frameNumber) > Number(currentFrame)) {
+            console.log('DEBUG 1', change.frameNumber, currentFrame);
             break;
         }
-        height = Number(change.platform_height);
+        height = Number(change.platformHeight);
+        console.log('DEBUG 2', height);
     }
+    console.log('DEBUG 3', height);
     return height;
 }
 
@@ -192,7 +195,11 @@ export const handler = async (event) => {
                      -- Most recent right platform change before the range
                      SELECT *
                      FROM (
-                              SELECT *
+                              SELECT
+                                match_id as matchId,
+                                frame as frameNumber,
+                                platform,
+                                platform_height as platformHeight
                               FROM platforms
                               WHERE match_id = '${matchId}'
                                 AND platform = 0
@@ -206,7 +213,11 @@ export const handler = async (event) => {
                      -- Most recent left platform change before the range
                      SELECT *
                      FROM (
-                              SELECT *
+                              SELECT
+                                match_id as matchId,
+                                frame as frameNumber,
+                                platform,
+                                platform_height as platformHeight
                               FROM platforms
                               WHERE match_id = '${matchId}'
                                 AND platform = 1
