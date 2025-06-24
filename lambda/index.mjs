@@ -65,10 +65,10 @@ function getPlatformHeightAtFrame(changes, currentFrame) {
     let height = null;
 
     for (const change of changes) {
-        if (change.frame > currentFrame) {
+        if (Number(change.frame) > Number(currentFrame)) {
             break;
         }
-        height = change.platform_height;
+        height = Number(change.platform_height);
     }
     return height;
 }
