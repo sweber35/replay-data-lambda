@@ -341,11 +341,11 @@ export const handler = async (event) => {
             const stageState = {
                 frameNumber: Number(frameNumber),
                 fodLeftPlatformHeight: Number(getPlatformHeightAtFrame(
-                    platformFrames.filter(frame => frame.platform == 1).sort((a, b) => b.frame - a.frame),
+                    platformFrames.filter(frame => frame.platform == 1).sort((a, b) => a.frame - b.frame),
                     frameNumber
                 )),
                 fodRightPlatformHeight: Number(getPlatformHeightAtFrame(
-                    platformFrames.filter(frame => frame.platform == 0).sort((a, b) => b.frame - a.frame),
+                    platformFrames.filter(frame => frame.platform == 0).sort((a, b) => a.frame - b.frame),
                     frameNumber
                 ))
             };
