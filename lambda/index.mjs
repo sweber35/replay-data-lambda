@@ -174,152 +174,164 @@ export const handler = async (event) => {
         const platformsQuery = `
             SELECT *
             FROM (
-                 -- Platform changes within the range
-                 SELECT *
-                 FROM platforms
-                 WHERE match_id = '${matchId}'
-                   AND frame BETWEEN ${frameStart} AND ${frameEnd}
-    
-                 UNION ALL
-    
-                 -- Most recent right platform change before the range
-                 SELECT *
-                 FROM (
-                          SELECT *
-                          FROM platforms
-                          WHERE match_id = '${matchId}'
-                            AND platform = 0
-                            AND frame < ${frameStart}
-                          ORDER BY frame DESC
-                              LIMIT 1
-                      )
-    
-                 UNION ALL
-    
-                 -- Most recent left platform change before the range
-                 SELECT *
-                 FROM (
-                          SELECT *
-                          FROM platforms
-                          WHERE match_id = '${matchId}'
-                            AND platform = 1
-                            AND frame < ${frameStart}
-                          ORDER BY frame DESC
-                              LIMIT 1
+                     -- Platform changes within the range
+                     SELECT *
+                     FROM platforms
+                     WHERE match_id = '${matchId}'
+                       AND frame BETWEEN ${frameStart} AND ${frameEnd}
+
+                     UNION ALL
+
+                     -- Most recent right platform change before the range
+                     SELECT *
+                     FROM (
+                              SELECT *
+                              FROM platforms
+                              WHERE match_id = '${matchId}'
+                                AND platform = 0
+                                AND frame < ${frameStart}
+                              ORDER BY frame DESC
+                                  LIMIT 1
+                          )
+
+                     UNION ALL
+
+                     -- Most recent left platform change before the range
+                     SELECT *
+                     FROM (
+                              SELECT *
+                              FROM platforms
+                              WHERE match_id = '${matchId}'
+                                AND platform = 1
+                                AND frame < ${frameStart}
+                              ORDER BY frame DESC
+                                  LIMIT 1
                           )
                  ) t
             ORDER BY frame;
         `;
         const platformFrames = await runAthenaQuery(platformsQuery);
 
-        let frames = [];
+        const groupedFrames = new Map();
 
         for (const frame of framesResult) {
-            let players = [];
-            let items = [];
-            players.push({
-                frameNumber: frame.frame_number,
-                playerIndex: frame.player_index,
-                inputs: {
+            const f = frame.frame_number;
+            if (!groupedFrames.has(f)) {
+                groupedFrames.set(f, []);
+            }
+            groupedFrames.get(f).push(frame);
+        }
+
+        let frames = [];
+
+        for (const [frameNumber, frameGroup] of groupedFrames.entries()) {
+            const players = [];
+            const items = [];
+
+            for (const frame of frameGroup) {
+                players.push({
                     frameNumber: frame.frame_number,
                     playerIndex: frame.player_index,
-                    isNana: frame.follower,
-                    physical: {
-                        dPadLeft: Boolean(frame.buttons & 0x0001),
-                        dPadRight: Boolean(frame.buttons & 0x0002),
-                        dPadDown: Boolean(frame.buttons & 0x0004),
-                        dPadUp: Boolean(frame.buttons & 0x0008),
-                        z: Boolean(frame.buttons & 0x0010),
-                        rTriggerAnalog: frame.phys_r,
-                        rTriggerDigital: Boolean(frame.buttons & 0x0020),
-                        lTriggerAnalog: frame.phys_l,
-                        lTriggerDigital: Boolean(frame.buttons & 0x0040),
-                        a: Boolean(frame.buttons & 0x0100),
-                        b: Boolean(frame.buttons & 0x0200),
-                        x: Boolean(frame.buttons & 0x0400),
-                        y: Boolean(frame.buttons & 0x0800),
-                        start: Boolean(frame.buttons & 0x1000),
+                    inputs: {
+                        frameNumber: frame.frame_number,
+                        playerIndex: frame.player_index,
+                        isNana: frame.follower === 'true',
+                        physical: {
+                            dPadLeft: Boolean(frame.buttons & 0x0001),
+                            dPadRight: Boolean(frame.buttons & 0x0002),
+                            dPadDown: Boolean(frame.buttons & 0x0004),
+                            dPadUp: Boolean(frame.buttons & 0x0008),
+                            z: Boolean(frame.buttons & 0x0010),
+                            rTriggerAnalog: frame.phys_r,
+                            rTriggerDigital: Boolean(frame.buttons & 0x0020),
+                            lTriggerAnalog: frame.phys_l,
+                            lTriggerDigital: Boolean(frame.buttons & 0x0040),
+                            a: Boolean(frame.buttons & 0x0100),
+                            b: Boolean(frame.buttons & 0x0200),
+                            x: Boolean(frame.buttons & 0x0400),
+                            y: Boolean(frame.buttons & 0x0800),
+                            start: Boolean(frame.buttons & 0x1000),
+                        },
+                        processed: {
+                            dPadLeft: Boolean(frame.buttons & 0x0001),
+                            dPadRight: Boolean(frame.buttons & 0x0002),
+                            dPadDown: Boolean(frame.buttons & 0x0004),
+                            dPadUp: Boolean(frame.buttons & 0x0008),
+                            z: Boolean(frame.buttons & 0x0010),
+                            rTriggerDigital: Boolean(frame.buttons & 0x0020),
+                            lTriggerDigital: Boolean(frame.buttons & 0x0040),
+                            a: Boolean(frame.buttons & 0x0100),
+                            b: Boolean(frame.buttons & 0x0200),
+                            x: Boolean(frame.buttons & 0x0400),
+                            y: Boolean(frame.buttons & 0x0800),
+                            start: Boolean(frame.buttons & 0x1000),
+                            joystickX: frame.joy_x,
+                            joystickY: frame.joy_y,
+                            cStickX: frame.c_x,
+                            cStickY: frame.c_y,
+                            anyTrigger: Math.max(frame.phys_l, frame.phys_r)
+                        }
                     },
-                    processed: { // TODO: slippc is a little weird about this
-                        dPadLeft: Boolean(frame.buttons & 0x0001),
-                        dPadRight: Boolean(frame.buttons & 0x0002),
-                        dPadDown: Boolean(frame.buttons & 0x0004),
-                        dPadUp: Boolean(frame.buttons & 0x0008),
-                        z: Boolean(frame.buttons & 0x0010),
-                        rTriggerDigital: Boolean(frame.buttons & 0x0020),
-                        lTriggerDigital: Boolean(frame.buttons & 0x0040),
-                        a: Boolean(frame.buttons & 0x0100),
-                        b: Boolean(frame.buttons & 0x0200),
-                        x: Boolean(frame.buttons & 0x0400),
-                        y: Boolean(frame.buttons & 0x0800),
-                        start: Boolean(frame.buttons & 0x1000),
-                        joystickX: frame.joy_x,
-                        joystickY: frame.joy_y,
-                        cStickX: frame.c_x,
-                        cStickY: frame.c_y,
-                        anyTrigger: Math.max(frame.phys_l, frame.phys_r)
-                    },
-                },
-                // TODO: nanaInputs, naneState
-                state: {
-                    frameNumber: frame.frame_number,
-                    playerIndex: frame.player_index,
-                    isNana: frame.follower,
-                    internalCharacterId: frame.char_id,
-                    actionStateId: frame.action_post, // TODO: pre or post?
-                    xPosition: frame.pos_x_post,
-                    yPosition: frame.pos_y_post,
-                    facingDirection: frame.face_dir_post,
-                    percent: frame.percent_post,
-                    shieldSize: frame.shield,
-                    lastHittingAttackId: frame.hit_with,
-                    currentComboCount: frame.combo,
-                    lastHitBy:frame.hurt_by,
-                    stocksRemaining: frame.stocks,
-                    actionStateFrameCounter: frame.action_fc,
-                    hitstunRemaining: frame.hitstun,
-                    isGrounded: !frame.airborne,
-                    lastGroundId: frame.ground_id,
-                    jumpsRemaining: frame.jumps,
-                    lCancelStatus: frame.l_cancel,
-                    hurtboxCollisionState: frame.hurtbox,
-                    selfInducedAirXSpeed: frame.self_air_x,
-                    selfInducedAirYSpeed: frame.self_air_y,
-                    attackBasedXSpeed: frame.attack_x,
-                    attackBasedYSpeed: frame.attack_y,
-                    selfInducedGroundXSpeed: frame.self_grd_x,
-                    hitlagRemaining: frame.hitlag,
-                    isInHitstun: frame.hitstun > 0,
-                    isDead: !frame.alive,
+                    state: {
+                        frameNumber: frame.frame_number,
+                        playerIndex: frame.player_index,
+                        isNana: frame.follower === 'true',
+                        internalCharacterId: frame.char_id,
+                        actionStateId: frame.action_post,
+                        xPosition: frame.pos_x_post,
+                        yPosition: frame.pos_y_post,
+                        facingDirection: frame.face_dir_post,
+                        percent: frame.percent_post,
+                        shieldSize: frame.shield,
+                        lastHittingAttackId: frame.hit_with,
+                        currentComboCount: frame.combo,
+                        lastHitBy: frame.hurt_by,
+                        stocksRemaining: frame.stocks,
+                        actionStateFrameCounter: frame.action_fc,
+                        hitstunRemaining: frame.hitstun,
+                        isGrounded: !frame.airborne,
+                        lastGroundId: frame.ground_id,
+                        jumpsRemaining: frame.jumps,
+                        lCancelStatus: frame.l_cancel,
+                        hurtboxCollisionState: frame.hurtbox,
+                        selfInducedAirXSpeed: frame.self_air_x,
+                        selfInducedAirYSpeed: frame.self_air_y,
+                        attackBasedXSpeed: frame.attack_x,
+                        attackBasedYSpeed: frame.attack_y,
+                        selfInducedGroundXSpeed: frame.self_grd_x,
+                        hitlagRemaining: frame.hitlag,
+                        isInHitstun: frame.hitstun > 0,
+                        isDead: !frame.alive,
+                        ...playerStateDefaults
+                    }
+                });
+            }
 
-                    ...playerStateDefaults
-                }
-            });
-
-            let relevantItemFrames = itemFrames.filter( itemFrame => itemFrame.frameNumber === frame.frame_number);
-
-            for (itemFrame of relevantItemFrames) {
+            // Items for the frame
+            let relevantItemFrames = itemFrames.filter(itemFrame => itemFrame.frameNumber === frameNumber);
+            for (const itemFrame of relevantItemFrames) {
                 items.push({
                     ...itemFrame,
                     ...itemStateDefaults
                 });
             }
 
-            let stageState = {
-                frameNumber: frame.frame_number,
+            // Stage state
+            const stageState = {
+                frameNumber: frameNumber,
                 fodLeftPlatformHeight: getPlatformHeightAtFrame(
-                    platformFrames.filter(frame => frame.platform == 1).sort(({frame: a}, {frame: b}) => b-a),
-                    frame.frame_number
+                    platformFrames.filter(frame => frame.platform == 1).sort((a, b) => b.frame - a.frame),
+                    frameNumber
                 ),
                 fodRightPlatformHeight: getPlatformHeightAtFrame(
-                    platformFrames.filter(frame => frame.platform == 0).sort(({frame: a}, {frame: b}) => b-a),
-                    frame.frame_number
+                    platformFrames.filter(frame => frame.platform == 0).sort((a, b) => b.frame - a.frame),
+                    frameNumber
                 )
-            }
+            };
 
             frames.push({
-                frameNumber: frame.frame_number,
-                randomSeed: frame.seed,
+                frameNumber,
+                randomSeed: frameGroup[0].seed, // should be the same for all players in that frame
                 players,
                 items,
                 stage: stageState
@@ -343,7 +355,7 @@ export const handler = async (event) => {
         return {
             statusCode: 200,
             body: JSON.stringify(replayData),
-            header: {
+            headers: {
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Headers': 'Content-Type',
                 'Access-Control-Allow-Methods': 'OPTIONS,POST,GET',
