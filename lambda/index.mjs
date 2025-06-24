@@ -70,7 +70,7 @@ function getPlatformHeightAtFrame(changes, currentFrame) {
             break;
         }
         height = Number(change.platformHeight);
-        console.log('DEBUG 2', height);
+        console.log('DEBUG 2', change.platformHeight);
     }
     console.log('DEBUG 3', height);
     return height;
