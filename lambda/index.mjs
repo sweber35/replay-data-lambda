@@ -328,7 +328,14 @@ export const handler = async (event) => {
         }
 
         console.log(JSON.stringify(replayData, null, 2));
-        return JSON.stringify(replayData);
+        return {
+            statusCode: 200,
+            body: JSON.stringify(replayData),
+            header: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Content-Type',
+            }
+        };
 
     } catch (err) {
         console.error('Athena query error:', err);
