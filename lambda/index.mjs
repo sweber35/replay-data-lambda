@@ -5,6 +5,12 @@ import {
     GetQueryResultsCommand,
 } from '@aws-sdk/client-athena';
 import {
+    S3Client,
+    GetObjectCommand,
+    PutObjectCommand
+} from '@aws-sdk/client-s3';
+
+import {
     gameEndingDefaults,
     itemStateDefaults,
     matchSettingsDefaults,
@@ -13,6 +19,35 @@ import {
 } from "./defaults.mjs";
 
 const athena = new AthenaClient({ region: 'us-east-2' });
+const s3 = new S3Client({ region: 'us-east-2' });
+const CACHE_BUCKET = 'analyze-melee-replay-cache';
+
+function getReplayCacheKey(matchId, frameStart, frameEnd) {
+    return `replays/${matchId}-${frameStart}-${frameEnd}.json`;
+}
+
+async function tryGetCachedReplay(key) {
+    try {
+        const obj = await s3.send(new GetObjectCommand({
+            Bucket: CACHE_BUCKET,
+            Key: key
+        }));
+        const body = await obj.Body.transformToString();
+        return JSON.parse(body);
+    } catch (err) {
+        if (err.name !== 'NoSuchKey') console.error('Cache miss error:', err);
+        return null;
+    }
+}
+
+async function cacheReplayJson(key, payload) {
+    await s3.send(new PutObjectCommand({
+        Bucket: CACHE_BUCKET,
+        Key: key,
+        Body: JSON.stringify(payload),
+        ContentType: 'application/json'
+    }));
+}
 
 async function runAthenaQuery(query) {
 
@@ -96,14 +131,26 @@ export const handler = async (event) => {
 
     try {
         const { matchId, frameStart, frameEnd } = JSON.parse(event.body);
-        if (!matchId) {
-            return { statusCode: 400, body: JSON.stringify({ error: 'Missing matchId' }) };
+        if (!matchId || !frameStart || !frameEnd) {
+            return {
+                statusCode: 400,
+                body: JSON.stringify({ error: 'Missing matchId, frameStart, or frameEnd' }),
+            };
         }
-        if (!frameStart) {
-            return { statusCode: 400, body: JSON.stringify({ error: 'Missing frameStart' }) };
-        }
-        if (!frameEnd) {
-            return { statusCode: 400, body: JSON.stringify({ error: 'Missing frameEnd' }) };
+
+        const cacheKey = getReplayCacheKey(matchId, frameStart, frameEnd);
+        const cachedReplay = await tryGetCachedReplay(cacheKey);
+
+        if (cachedReplay) {
+            return {
+                statusCode: 200,
+                body: JSON.stringify(cachedReplay),
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Headers': 'Content-Type',
+                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET',
+                },
+            };
         }
 
         // match settings
@@ -390,6 +437,8 @@ export const handler = async (event) => {
             frames,
             ending: gameEnding
         }
+
+        await cacheReplayJson(cacheKey, replayData);
 
         return {
             statusCode: 200,
