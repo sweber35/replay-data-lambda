@@ -145,6 +145,7 @@ export const handler = async (event) => {
             FROM frames
             WHERE match_id = '${ matchId }'
               AND frame_number BETWEEN ${frameStart} AND ${frameEnd}
+            ORDER BY frame_number ASC
         `;
         const framesResult = await runAthenaQuery(framesQuery);
 
