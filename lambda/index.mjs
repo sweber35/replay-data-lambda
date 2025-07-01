@@ -378,6 +378,9 @@ export const handler = async (event) => {
                 });
             }
 
+            // Sort players by playerIndex to ensure correct order
+            players.sort((a, b) => a.playerIndex - b.playerIndex);
+
             // Items for the frame
             let relevantItemFrames = itemFrames.filter(itemFrame => itemFrame.frameNumber === frameNumber);
             for (const itemFrame of relevantItemFrames) {
