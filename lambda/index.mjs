@@ -409,12 +409,12 @@ export const handler = async (event) => {
                 frameNumber: Number(frameNumber),
                 fodLeftPlatformHeight: Number(getPlatformHeightAtFrame(
                     platformFrames.filter(frame => frame.platform == 1).sort((a, b) => a.frame - b.frame),
-                    frameNumber,
+                    frameNumber + 122,
                     20.0
                 )),
                 fodRightPlatformHeight: Number(getPlatformHeightAtFrame(
                     platformFrames.filter(frame => frame.platform == 0).sort((a, b) => a.frame - b.frame),
-                    frameNumber,
+                    frameNumber + 122,
                     27.44186047
                 ))
             };
